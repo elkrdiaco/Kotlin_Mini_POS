@@ -84,33 +84,7 @@ fun HomeScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top // O .Center si prefieres los botones centrados verticalmente
         ) {
-            // Botones de navegación
-            Button(
-                onClick = { navController.navigate(AppScreens.DEPOSIT_SCREEN) },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(Icons.Outlined.AccountBalanceWallet, contentDescription = "Depósito", modifier = Modifier.padding(end = 8.dp))
-                Text("Ir a Depósitos")
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Button(
-                onClick = { navController.navigate(AppScreens.SYNC_SCREEN) },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(Icons.Filled.Sync, contentDescription = "Sincronización", modifier = Modifier.padding(end = 8.dp))
-                Text("Ir a Sincronización")
-            }
-            Spacer(modifier = Modifier.height(8.dp)) // Espacio antes del nuevo botón
-            Button( // <<<--- NUEVO BOTÓN PARA BALANCE
-                onClick = { navController.navigate(AppScreens.BALANCE_SCREEN) },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(Icons.Filled.AccountBalance, contentDescription = "Balance", modifier = Modifier.padding(end = 8.dp))
-                Text("Consultar Balance")
-            }
-            Spacer(modifier = Modifier.height(16.dp)) // Espacio antes del contenido principal
 
-            // Tu contenido principal existente
             HomeScreenMainContent(
                 modifier = Modifier.fillMaxWidth(), // HomeScreenMainContent ahora ocupa el ancho disponible
                 uiState = uiState,

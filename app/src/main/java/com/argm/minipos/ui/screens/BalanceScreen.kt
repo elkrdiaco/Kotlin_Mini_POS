@@ -1,4 +1,4 @@
-package com.argm.minipos.ui.balance
+package com.argm.minipos.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,7 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
+import com.argm.minipos.ui.viewmodel.BalanceViewModel
 
 @Composable
 fun BalanceScreen(balanceViewModel: BalanceViewModel = hiltViewModel()) {
@@ -32,6 +32,7 @@ fun BalanceScreen(balanceViewModel: BalanceViewModel = hiltViewModel()) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        Spacer(modifier = Modifier.height(50.dp))
         OutlinedTextField(
             value = uiState.accountId,
             onValueChange = { balanceViewModel.onAccountIdChange(it) },

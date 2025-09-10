@@ -1,4 +1,4 @@
-package com.argm.minipos.ui.balance
+package com.argm.minipos.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

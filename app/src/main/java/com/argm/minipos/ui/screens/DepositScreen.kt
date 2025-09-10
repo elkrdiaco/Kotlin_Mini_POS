@@ -1,4 +1,4 @@
-package com.argm.minipos.ui.deposit
+package com.argm.minipos.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -23,8 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.argm.minipos.ui.viewmodel.DepositViewModel
 
 @Composable
 fun DepositScreen(depositViewModel: DepositViewModel = hiltViewModel()) {
@@ -37,6 +37,7 @@ fun DepositScreen(depositViewModel: DepositViewModel = hiltViewModel()) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        Spacer(modifier = Modifier.height(50.dp))
         OutlinedTextField(
             value = uiState.amount,
             onValueChange = { depositViewModel.onAmountChange(it) },

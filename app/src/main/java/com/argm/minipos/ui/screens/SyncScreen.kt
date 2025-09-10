@@ -1,4 +1,4 @@
-package com.argm.minipos.ui.sync
+package com.argm.minipos.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -25,6 +25,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.argm.minipos.data.repository.PendingOperation // Importa la clase correcta
+import com.argm.minipos.ui.viewmodel.SyncViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -44,6 +45,8 @@ fun SyncScreen(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
+        Spacer(modifier = Modifier.height(50.dp))
         Text("Operaciones Pendientes", style = MaterialTheme.typography.headlineSmall)
 
         Spacer(modifier = Modifier.height(16.dp))

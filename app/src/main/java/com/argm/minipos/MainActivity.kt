@@ -10,13 +10,13 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.argm.minipos.ui.balance.BalanceScreen
-import com.argm.minipos.ui.deposit.DepositScreen
+import com.argm.minipos.ui.screens.BalanceScreen
+import com.argm.minipos.ui.screens.DepositScreen
 import com.argm.minipos.ui.navigation.AppScreens
 import com.argm.minipos.ui.screens.HomeScreen
 import com.argm.minipos.ui.screens.SalesHistoryScreen
 import com.argm.minipos.ui.screens.SalesScreen
-import com.argm.minipos.ui.sync.SyncScreen
+import com.argm.minipos.ui.screens.SyncScreen
 import com.argm.minipos.ui.theme.MiniPOSTheme
 import dagger.hilt.android.AndroidEntryPoint
 
