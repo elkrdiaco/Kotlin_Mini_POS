@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.argm.minipos.ui.balance.BalanceScreen
 import com.argm.minipos.ui.deposit.DepositScreen
 import com.argm.minipos.ui.navigation.AppScreens
 import com.argm.minipos.ui.screens.HomeScreen
@@ -55,6 +56,9 @@ fun MiniPosApp() {
         }
         composable(AppScreens.SYNC_SCREEN) {
             SyncScreen()
+        }
+        composable(AppScreens.BALANCE_SCREEN) { // <<<--- AÑADE ESTE BLOQUE
+            BalanceScreen( /* navController = navController */ ) // BalanceScreen podría o no necesitar navController
         }
     }
 }

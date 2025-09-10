@@ -18,10 +18,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
-fun BalanceScreen(balanceViewModel: BalanceViewModel = viewModel()) {
+fun BalanceScreen(balanceViewModel: BalanceViewModel = hiltViewModel()) {
     val uiState by balanceViewModel.uiState.collectAsState()
 
     Column(

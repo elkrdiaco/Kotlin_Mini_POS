@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth // Para que los botones o
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBalance
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Sync // Icono para Sincronización (opcional)
 import androidx.compose.material.icons.outlined.AccountBalanceWallet // Icono para Depósito (opcional)
@@ -99,7 +100,14 @@ fun HomeScreen(
                 Icon(Icons.Filled.Sync, contentDescription = "Sincronización", modifier = Modifier.padding(end = 8.dp))
                 Text("Ir a Sincronización")
             }
-
+            Spacer(modifier = Modifier.height(8.dp)) // Espacio antes del nuevo botón
+            Button( // <<<--- NUEVO BOTÓN PARA BALANCE
+                onClick = { navController.navigate(AppScreens.BALANCE_SCREEN) },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(Icons.Filled.AccountBalance, contentDescription = "Balance", modifier = Modifier.padding(end = 8.dp))
+                Text("Consultar Balance")
+            }
             Spacer(modifier = Modifier.height(16.dp)) // Espacio antes del contenido principal
 
             // Tu contenido principal existente
