@@ -1,9 +1,15 @@
 package com.argm.minipos.di
 
+import com.argm.minipos.data.repository.CustomerRepository
+import com.argm.minipos.data.repository.CustomerRepositoryImpl
+import com.argm.minipos.data.repository.InMemoryPendingOperationRepository
+import com.argm.minipos.data.repository.PendingOperationRepository
 import com.argm.minipos.data.repository.ProductRepository
 import com.argm.minipos.data.repository.ProductRepositoryImpl
 import com.argm.minipos.data.repository.SaleRepository
 import com.argm.minipos.data.repository.SaleRepositoryImpl
+import com.argm.minipos.ui.viewmodel.DepositService
+import com.argm.minipos.ui.viewmodel.SimulatedDepositService
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -25,4 +31,22 @@ abstract class RepositoryModule {
     abstract fun bindSaleRepository(
         saleRepositoryImpl: SaleRepositoryImpl
     ): SaleRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindPendingOperationRepository(
+        inMemoryPendingOperationRepository: InMemoryPendingOperationRepository
+    ): PendingOperationRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindCustomerRepository(
+        customerRepositoryImpl: CustomerRepositoryImpl
+    ): CustomerRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindDepositService(
+        simulatedDepositService: SimulatedDepositService
+    ): DepositService
 }

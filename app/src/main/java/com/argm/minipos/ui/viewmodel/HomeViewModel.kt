@@ -60,9 +60,9 @@ class HomeViewModel @Inject constructor(
             try {
                 val sampleProduct = Product(
                     id = UUID.randomUUID().toString(),
-                    name = "Producto de Muestra ${UUID.randomUUID().toString().take(4)}",
-                    price = (10..100).random().toDouble(),
-                    stockQuantity = (1..20).random(),
+                    name = "Producto ${UUID.randomUUID().toString().take(4)}",
+                    price = (1000..100000).random().toDouble(),
+                    stockQuantity = (10..100).random(),
                     category = if (Math.random() > 0.5) "Electrónicos" else "Ropa"
                 )
                 productRepository.insertProduct(sampleProduct)

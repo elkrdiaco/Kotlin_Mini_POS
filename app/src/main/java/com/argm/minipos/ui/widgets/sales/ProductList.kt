@@ -21,7 +21,7 @@ fun ProductList(
         contentPadding = PaddingValues(vertical = 16.dp)
     ) {
         items(products) { product ->
-            ProductSaleItem( // Uses the imported ProductSaleItem
+            ProductSaleItem(
                 product = product,
                 onProductClick = { onProductClick(product) }
             )

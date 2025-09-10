@@ -7,10 +7,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Sync
+import androidx.compose.material.icons.outlined.AccountBalanceWallet
+import androidx.compose.material.icons.outlined.ProductionQuantityLimits
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,9 +25,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.argm.minipos.ui.navigation.AppScreens
 import com.argm.minipos.ui.viewmodel.HomeUiState
-
-// Import ProductItem desde su nueva ubicación
-
 
 @Composable
 fun HomeScreenMainContent(
@@ -38,13 +40,28 @@ fun HomeScreenMainContent(
             CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
         }
 
+        Button(
+            onClick = { navController.navigate(AppScreens.DEPOSIT_SCREEN) },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Icon(Icons.Outlined.AccountBalanceWallet, contentDescription = "Depósito", modifier = Modifier.padding(end = 8.dp))
+            Text("Ir a Depósitos")
+        }
         Spacer(modifier = Modifier.height(8.dp))
-
+        Button(
+            onClick = { navController.navigate(AppScreens.SYNC_SCREEN) },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Icon(Icons.Filled.Sync, contentDescription = "Sincronización", modifier = Modifier.padding(end = 8.dp))
+            Text("Ir a Sincronización")
+        }
+        Spacer(modifier = Modifier.height(8.dp))
         Button(
             onClick = { navController.navigate(AppScreens.SALES_SCREEN) },
-            modifier = Modifier.fillMaxWidth(0.8f)
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Nueva Venta")
+            Icon(Icons.Outlined.ProductionQuantityLimits, contentDescription = "Venta", modifier = Modifier.padding(end = 8.dp))
+            Text("Realizar Venta")
         }
 
         Spacer(modifier = Modifier.height(16.dp))

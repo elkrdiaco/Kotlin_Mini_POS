@@ -42,9 +42,6 @@ android {
 }
 
 dependencies {
-
-    // Excluir la versión antigua de annotations de forma global
-    // Esto es preferible si varias dependencias la traen transitivamente.
     configurations.all {
         exclude(group = "com.intellij", module = "annotations")
     }
@@ -57,6 +54,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
 
     // Hilt
     implementation(libs.hilt.android)
@@ -72,6 +70,13 @@ dependencies {
     implementation(libs.androidx.material.icons.extended)
 
     testImplementation(libs.junit)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.inline)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.androidx.arch.core.testing)
+    testImplementation(libs.mockk.android)
+    testImplementation(libs.mockk.agent)
+
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

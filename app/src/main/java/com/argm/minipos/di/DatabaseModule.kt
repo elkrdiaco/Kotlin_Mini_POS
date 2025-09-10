@@ -3,6 +3,8 @@ package com.argm.minipos.di
 import android.content.Context
 import androidx.room.Room
 import com.argm.minipos.data.local.AppDatabase
+import com.argm.minipos.data.local.dao.CustomerDao
+import com.argm.minipos.data.local.dao.PendingDepositDao
 import com.argm.minipos.data.local.dao.ProductDao
 import com.argm.minipos.data.local.dao.SaleDao
 import dagger.Module
@@ -24,6 +26,7 @@ object DatabaseModule {
             AppDatabase::class.java,
             "minipos_database"
         )
+            .fallbackToDestructiveMigration()
             .build()
     }
 
@@ -35,5 +38,15 @@ object DatabaseModule {
     @Provides
     fun provideProductDao(appDatabase: AppDatabase): ProductDao {
         return appDatabase.productDao()
+    }
+
+    @Provides
+    fun provideCustomerDao(appDatabase: AppDatabase): CustomerDao {
+        return appDatabase.customerDao()
+    }
+
+    @Provides
+    fun providePendingDepositDao(appDatabase: AppDatabase): PendingDepositDao {
+        return appDatabase.pendingDepositDao()
     }
 }

@@ -1,4 +1,4 @@
-package com.argm.minipos.util
+package com.argm.minipos.utils
 
 import androidx.room.TypeConverter
 import java.math.BigDecimal
