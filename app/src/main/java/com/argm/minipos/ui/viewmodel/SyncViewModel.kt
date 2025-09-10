@@ -2,10 +2,10 @@ package com.argm.minipos.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.argm.minipos.data.repository.CustomerRepository // Importar CustomerRepository
+import com.argm.minipos.data.repository.CustomerRepository
 import com.argm.minipos.data.repository.PendingOperation
 import com.argm.minipos.data.repository.PendingOperationRepository
-import com.argm.minipos.util.UiResult // Importar UiResult si CustomerRepository lo usa
+import com.argm.minipos.util.UiResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -26,7 +26,7 @@ data class SyncUiState(
 class SyncViewModel @Inject constructor(
     private val pendingOperationRepository: PendingOperationRepository,
     private val depositService: DepositService,
-    private val customerRepository: CustomerRepository // Añadido CustomerRepository
+    private val customerRepository: CustomerRepository
 ) : ViewModel() {
 
     private val _isLoading = MutableStateFlow(false)
@@ -59,11 +59,10 @@ class SyncViewModel @Inject constructor(
             var operationsProcessedSuccessfully = 0
             var operationsFailedOrRetried = 0
 
-            // Corrected filter: uses operation.type for specific types and operation.status for generic retryable states.
             val operationsToSync = uiState.value.pendingOperations.filter { operation ->
                 operation.type == "DEPOSIT_AWAITING_SYNC_AND_BALANCE_UPDATE" ||
                         operation.type == "DEPOSIT_SERVER_OK_LOCAL_BALANCE_FAILED" ||
-                        (operation.status == "PENDING" || operation.status == "FAILED_RETRY") // Catch general pending/retry
+                        (operation.status == "PENDING" || operation.status == "FAILED_RETRY")
             }.toList()
 
             if (operationsToSync.isEmpty()) {
@@ -74,7 +73,6 @@ class SyncViewModel @Inject constructor(
             }
 
             operationsToSync.forEach { operation ->
-                // Ensure we don't re-process an operation within the same sync batch if its status changes
                 val currentOperationState = pendingOperationRepository.getOperation(operation.id) ?: return@forEach
                 if (currentOperationState.status == "PROCESSING" || currentOperationState.status == "SYNCED_AND_BALANCED" || currentOperationState.status.contains("PERMANENTLY")) {
                     return@forEach // Skip if already processing or in a final state
@@ -116,7 +114,7 @@ class SyncViewModel @Inject constructor(
                                         }
                                         else -> {}
                                     }
-                                } else { // Fallo del servidor
+                                } else {
                                     operationsFailedOrRetried++
                                     val newAttempts = currentOperationState.attempts + 1
                                     pendingOperationRepository.updateOperation(
@@ -158,20 +156,11 @@ class SyncViewModel @Inject constructor(
                                 }
                             }
                         }
-                        // Consider other types if they exist and follow the "PENDING" or "FAILED_RETRY" status logic
                         else -> {
                             if (currentOperationState.status == "PENDING" || currentOperationState.status == "FAILED_RETRY") {
-                                // Generic handling for other types that might just need a server sync
-                                // For example, if you had a generic "DEPOSIT" type that implied local balance was already updated
-                                // _syncStatusMessage.value = "Procesando tipo genérico ${currentOperationState.type}..."
-                                // This section needs specific logic based on what other types mean.
-                                // For now, mark as unknown if not one of the specific customer deposit types.
                                 operationsFailedOrRetried++
                                 pendingOperationRepository.updateOperation(currentOperationState.copy(status = "FAILED_UNKNOWN_TYPE_IN_SYNC"))
-                            } else {
-                                // This operation was in operationsToSync but its type/status doesn't match known logic.
-                                // This should ideally not happen if the initial filter is correct.
-                            }
+                            } else {}
                         }
                     }
                 } catch (e: Exception) {

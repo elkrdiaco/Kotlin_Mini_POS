@@ -72,10 +72,5 @@ fun BalanceScreen(balanceViewModel: BalanceViewModel = hiltViewModel()) {
 @Preview(showBackground = true)
 @Composable
 fun BalanceScreenPreview() {
-    // En el Preview, no podemos instanciar directamente el ViewModel
-    // que depende de Hilt o de un SavedStateHandle.
-    // Para previsualizaciones más complejas, se pueden crear ViewModels falsos.
-    // Por ahora, BalanceScreenPreview se queda así, o se puede simplificar
-    // pasando un estado predefinido si se refactoriza BalanceScreen para aceptar uiState directamente.
-    BalanceScreen() // Esta preview mostrará el estado inicial del ViewModel real.
+    BalanceScreen()
 }

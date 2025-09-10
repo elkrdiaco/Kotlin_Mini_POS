@@ -5,7 +5,6 @@ import com.argm.minipos.util.UiResult
 import kotlinx.coroutines.flow.Flow
 
 interface CustomerRepository {
-    // Modificado para devolver UiResult<Customer>
     suspend fun addCustomer(customer: Customer): UiResult<Customer>
 
     fun getCustomerByRut(rut: String): Flow<Customer?>
@@ -14,11 +13,9 @@ interface CustomerRepository {
 
     suspend fun syncPendingDepositsForCustomer(rut: String): UiResult<String>
 
-    // Modificado para aceptar isOffline y devolver UiResult<Unit>
     suspend fun recordDeposit(rut: String, amount: Double, isOffline: Boolean): UiResult<Unit>
 
     suspend fun addBalanceToCustomer(rut: String, amountToAdd: Double): UiResult<Unit>
 
-    // <<<--- FUNCIÓN NECESARIA PARA DESCONTAR SALDO --- >>>
     suspend fun deductBalanceFromCustomer(rut: String, amountToDeduct: Double): UiResult<Unit>
 }

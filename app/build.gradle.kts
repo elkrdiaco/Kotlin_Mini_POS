@@ -42,9 +42,6 @@ android {
 }
 
 dependencies {
-
-    // Excluir la versión antigua de annotations de forma global
-    // Esto es preferible si varias dependencias la traen transitivamente.
     configurations.all {
         exclude(group = "com.intellij", module = "annotations")
     }
@@ -57,7 +54,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation(libs.androidx.lifecycle.viewmodel.compose) // Added ViewModel Compose
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
 
     // Hilt
     implementation(libs.hilt.android)

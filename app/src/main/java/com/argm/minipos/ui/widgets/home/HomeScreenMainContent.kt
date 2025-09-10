@@ -8,8 +8,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBalance
-import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.outlined.AccountBalanceWallet
 import androidx.compose.material.icons.outlined.ProductionQuantityLimits
@@ -27,9 +25,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.argm.minipos.ui.navigation.AppScreens
 import com.argm.minipos.ui.viewmodel.HomeUiState
-
-// Import ProductItem desde su nueva ubicación
-
 
 @Composable
 fun HomeScreenMainContent(

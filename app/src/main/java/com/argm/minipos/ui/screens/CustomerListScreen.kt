@@ -1,4 +1,4 @@
-package com.argm.minipos.ui.screens.customer
+package com.argm.minipos.ui.screens
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -13,7 +13,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -68,7 +67,7 @@ fun CustomerListScreen(
                                     onClick = {
                                     navController.previousBackStackEntry
                                         ?.savedStateHandle
-                                        ?.set(SELECTED_CUSTOMER_RUT_KEY, customer.rut) // <--- CORRECTO
+                                        ?.set(SELECTED_CUSTOMER_RUT_KEY, customer.rut)
                                     navController.popBackStack()
                                 })
                                 HorizontalDivider()
@@ -102,8 +101,8 @@ fun CustomerItem(customer: Customer, onClick: () -> Unit) {
             .clickable(
                 onClick = onClick,
                 interactionSource = interactionSource,
-                indication = rememberRipple(bounded = true) // Ripple de Material 2
-            )// Se usa el parámetro onClick aquí
+                indication = rememberRipple(bounded = true)
+            )
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -129,9 +128,6 @@ fun AddCustomerDialog(
     var rut by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
     val addCustomerResult by viewModel.addCustomerResult.collectAsState()
-
-    // Resetea el resultado cuando el diálogo se cierra y el resultado no era Loading
-    // Esto es para que en la próxima apertura no muestre el resultado anterior.
     DisposableEffect(Unit) {
         onDispose {
             if (addCustomerResult !is UiResult.Loading) {
@@ -162,16 +158,12 @@ fun AddCustomerDialog(
 
                 when (val result = addCustomerResult) {
                     is UiResult.Loading -> {
-                        // No mostrar nada aquí o un pequeño spinner si se prefiere
                     }
                     is UiResult.Success -> {
-                        // El ViewModel maneja la recarga, podríamos cerrar el diálogo automáticamente
-                        // o mostrar un mensaje de éxito brevemente.
-                        // Para este ejemplo, cerramos si hay un Customer (es decir, no es el estado inicial/limpio)
                         if (result.data != null) {
-                            LaunchedEffect(result.data) { // Usar result.data como key
-                                onDismiss() // Cierra el diálogo en caso de éxito
-                                viewModel.clearAddCustomerResult() // Limpia el resultado para la próxima vez
+                            LaunchedEffect(result.data) {
+                                onDismiss()
+                                viewModel.clearAddCustomerResult()
                             }
                         }
                     }

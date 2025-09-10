@@ -9,7 +9,6 @@ import com.argm.minipos.data.model.PendingDeposit
 import com.argm.minipos.util.UiResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.firstOrNull // Necesario si getCustomerByRutOnce no existe y usamos getCustomerByRut().firstOrNull()
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -43,7 +42,7 @@ class CustomerRepositoryImpl @Inject constructor(
 
     override suspend fun updateCustomerBalance(rut: String, newBalance: Double): UiResult<Unit> = withContext(Dispatchers.IO) {
         try {
-            val customer = customerDao.getCustomerByRutOnce(rut) // Asumimos que esta función suspend existe y devuelve Customer?
+            val customer = customerDao.getCustomerByRutOnce(rut)
             if (customer == null) {
                 UiResult.Error("Cliente con RUT $rut no encontrado.")
             } else {
@@ -129,27 +128,20 @@ class CustomerRepositoryImpl @Inject constructor(
         }
     }
 
-    // <<<--- IMPLEMENTACIÓN DE LA NUEVA FUNCIÓN --- >>>
     override suspend fun deductBalanceFromCustomer(rut: String, amountToDeduct: Double): UiResult<Unit> = withContext(Dispatchers.IO) {
-        if (amountToDeduct < 0) { // No permitir descontar montos negativos directamente.
+        if (amountToDeduct < 0) {
             return@withContext UiResult.Error("El monto a descontar no puede ser negativo.")
         }
-        if (amountToDeduct == 0.0) { // Descontar cero no tiene efecto y es exitoso.
+        if (amountToDeduct == 0.0) {
             return@withContext UiResult.Success(Unit)
         }
 
         try {
-            // Utilizamos getCustomerByRutOnce que ya tienes y usas en otras funciones.
             val customer = customerDao.getCustomerByRutOnce(rut)
 
             if (customer == null) {
                 UiResult.Error("Cliente con RUT $rut no encontrado para descontar saldo.")
             } else {
-                // La validación de si customer.balance >= amountToDeduct ya la hace SalesViewModel.
-                // Si quisieras una doble verificación estricta aquí, podrías añadirla:
-                // if (customer.balance < amountToDeduct) {
-                //     return@withContext UiResult.Error("Saldo insuficiente. Saldo actual: ${customer.balance}, Descuento: $amountToDeduct")
-                // }
                 val newBalance = customer.balance - amountToDeduct
                 customerDao.updateCustomer(customer.copy(balance = newBalance))
                 UiResult.Success(Unit)

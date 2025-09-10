@@ -17,8 +17,7 @@ import com.argm.minipos.ui.screens.HomeScreen
 import com.argm.minipos.ui.screens.SalesHistoryScreen
 import com.argm.minipos.ui.screens.SalesScreen
 import com.argm.minipos.ui.screens.SyncScreen
-// Importar CustomerListScreen
-import com.argm.minipos.ui.screens.customer.CustomerListScreen 
+import com.argm.minipos.ui.screens.CustomerListScreen
 import com.argm.minipos.ui.theme.MiniPOSTheme
 import dagger.hilt.android.AndroidEntryPoint
 

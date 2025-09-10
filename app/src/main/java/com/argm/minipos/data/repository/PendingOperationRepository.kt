@@ -8,14 +8,10 @@ import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
-// Data class for a pending operation.
-// You might already have a similar one in SyncScreen.kt.
-// Ensure consistency or centralize this definition.
-// For this example, it's defined here.
 data class PendingOperation(
     val id: String = UUID.randomUUID().toString(),
-    val type: String, // e.g., "DEPOSIT"
-    val data: Map<String, Any>, // Flexible data for the operation (e.g., amount, accountId)
+    val type: String,
+    val data: Map<String, Any>,
     val timestamp: Long = System.currentTimeMillis(),
     var attempts: Int = 0,
     var lastAttemptTimestamp: Long? = null,

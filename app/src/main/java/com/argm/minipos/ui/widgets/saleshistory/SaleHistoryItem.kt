@@ -1,29 +1,28 @@
 package com.argm.minipos.ui.widgets.saleshistory
 
-import androidx.compose.foundation.background // Nuevo import
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box // Nuevo import
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size // Nuevo import
-import androidx.compose.foundation.shape.RoundedCornerShape // Nuevo import
-import androidx.compose.material.icons.Icons // Nuevo import
-import androidx.compose.material.icons.outlined.Schedule // Nuevo import (o el ícono que prefieras)
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon // Nuevo import
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip // Nuevo import
-import androidx.compose.ui.graphics.Color // Nuevo import (opcional, para el color de fondo)
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.argm.minipos.data.model.SaleWithItems
@@ -55,18 +54,18 @@ fun SaleHistoryItem(saleWithItems: SaleWithItems) {
                 )
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp)) // Esquinas redondeadas
-                        .background(MaterialTheme.colorScheme.surfaceContainer) // Fondo con transparencia
-                        .padding(horizontal = 8.dp, vertical = 4.dp) // Padding interno
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(MaterialTheme.colorScheme.surfaceContainer)
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             imageVector = Icons.Outlined.Schedule,
                             contentDescription = "Fecha de venta",
-                            modifier = Modifier.size(16.dp), // Ajusta el tamaño del ícono
+                            modifier = Modifier.size(16.dp),
                             tint = MaterialTheme.colorScheme.onSecondaryContainer
                         )
-                        Spacer(modifier = Modifier.size(4.dp)) // Espacio entre ícono y texto
+                        Spacer(modifier = Modifier.size(4.dp))
                         Text(
                             dateFormatter.format(saleWithItems.sale.timestamp),
                             style = MaterialTheme.typography.bodySmall,
@@ -74,7 +73,6 @@ fun SaleHistoryItem(saleWithItems: SaleWithItems) {
                         )
                     }
                 }
-                // --- Fin del cambio visual para la fecha ---
             }
 
             if (saleWithItems.items.isNotEmpty()) {

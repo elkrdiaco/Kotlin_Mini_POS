@@ -19,9 +19,6 @@ import java.util.Locale
 import javax.inject.Inject
 import kotlin.random.Random
 
-// DepositUiState, DepositService, SimulatedDepositService (sin cambios respecto a su definición original que ya tenías)
-// Asegúrate que DepositUiState.depositSuccess se interprete como:
-// "la operación de depósito se ha completado Y el saldo local está actualizado" O "la operación se ha guardado exitosamente como pendiente".
 data class DepositUiState(
     val selectedCustomerRut: String? = null,
     val selectedCustomerName: String? = null,
@@ -29,22 +26,21 @@ data class DepositUiState(
     val isLoading: Boolean = false,
     val message: String? = null,
     val isError: Boolean = false,
-    val depositSuccess: Boolean = false, // True if operation is completed OR successfully saved as pending
+    val depositSuccess: Boolean = false,
     val isOnline: Boolean = true
 )
 
 interface DepositService {
-    suspend fun makeDeposit(amount: Double, isOnline: Boolean): Result<String> // isOnline aquí puede ser un hint para el servicio
+    suspend fun makeDeposit(amount: Double, isOnline: Boolean): Result<String>
 }
 
 class SimulatedDepositService @Inject constructor() : DepositService {
     override suspend fun makeDeposit(amount: Double, isOnline: Boolean): Result<String> {
         delay(Random.nextLong(600, 1200))
-        // El servicio puede tener su propia lógica de fallo incluso si el ViewModel piensa que está online
         if (Random.nextFloat() < 0.2) { // 20% chance de fallo simulado del servidor
             return Result.failure(Exception("Error simulado por el servicio de depósito"))
         }
-        val commission = amount * 0.01 // Ejemplo de lógica de servicio
+        val commission = amount * 0.01
         val netAmount = amount - commission
         val formatter = NumberFormat.getCurrencyInstance(Locale("es", "CL"))
         return Result.success("Depósito de ${formatter.format(amount)} procesado por servidor. Neto: ${formatter.format(netAmount)}")
@@ -61,7 +57,6 @@ class DepositViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(DepositUiState())
     val uiState: StateFlow<DepositUiState> = _uiState.asStateFlow()
 
-    // onAmountChange, onCustomerSelected, clearCustomerSelection, onOnlineStatusChange (sin cambios)
     fun onAmountChange(newAmount: String) {
         val validAmount = newAmount.filter { it.isDigit() || it == '.' }
             .let { current ->
@@ -77,7 +72,7 @@ class DepositViewModel @Inject constructor(
                 amount = validAmount,
                 message = null,
                 isError = false,
-                depositSuccess = false // Resetear en cambio de monto
+                depositSuccess = false
             )
         }
     }
@@ -89,7 +84,7 @@ class DepositViewModel @Inject constructor(
                 selectedCustomerName = "Cargando...",
                 message = null,
                 isError = false,
-                depositSuccess = false // Resetear en cambio de cliente
+                depositSuccess = false
             )
         }
         customerRepository.getCustomerByRut(rut).onEach { customer ->
@@ -121,7 +116,6 @@ class DepositViewModel @Inject constructor(
         val rut = currentState.selectedCustomerRut
         val amountString = currentState.amount
 
-        // Validaciones
         if (rut == null) {
             _uiState.update { it.copy(isLoading = false, message = "Seleccione un cliente.", isError = true, depositSuccess = false) }
             return
@@ -141,18 +135,16 @@ class DepositViewModel @Inject constructor(
         viewModelScope.launch {
             val customerName = currentState.selectedCustomerName ?: rut
             val formattedAmount = NumberFormat.getCurrencyInstance(Locale("es", "CL")).format(amountValue)
-            // Usaremos un tipo de operación pendiente unificado que indique que el saldo local AÚN NO se ha actualizado.
             val pendingOperationType = "DEPOSIT_AWAITING_SYNC_AND_BALANCE_UPDATE"
             val operationData = mapOf(
                 "rut" to rut,
                 "amount" to amountValue,
-                "customerName" to customerName // Para mensajes más claros en SyncScreen si es necesario
+                "customerName" to customerName
             )
 
             if (currentState.isOnline) {
                 val serverResult = depositService.makeDeposit(amountValue, true)
                 if (serverResult.isSuccess) {
-                    // Sincronización con servidor exitosa, AHORA actualizar saldo local
                     val localResult = customerRepository.addBalanceToCustomer(rut, amountValue)
                     when (localResult) {
                         is UiResult.Success -> {
@@ -161,8 +153,8 @@ class DepositViewModel @Inject constructor(
                                     isLoading = false,
                                     message = "Depósito de $formattedAmount para $customerName completado y sincronizado. ${serverResult.getOrNull()}",
                                     isError = false,
-                                    depositSuccess = true, // Éxito completo
-                                    amount = "" // Limpiar monto
+                                    depositSuccess = true,
+                                    amount = ""
                                 )
                             }
                         }
@@ -175,30 +167,28 @@ class DepositViewModel @Inject constructor(
                                 it.copy(
                                     isLoading = false,
                                     message = "Sincronizado con servidor, pero falló la actualización local: ${localResult.message}. Registrado como pendiente para revisión.",
-                                    isError = true, // Indica un problema
-                                    depositSuccess = false // No fue un éxito completo en el flujo deseado
+                                    isError = true,
+                                    depositSuccess = false
                                 )
                             }
                         }
-                        else -> { /* No aplicable para Loading en este contexto */ }
+                        else -> { }
                     }
                 } else {
-                    // Sincronización con servidor falló: Guardar como pendiente SIN actualizar saldo local
                     pendingOperationRepository.addOperation(
-                        type = pendingOperationType, // Reutilizamos el tipo general
+                        type = pendingOperationType,
                         data = operationData + mapOf("serverError" to (serverResult.exceptionOrNull()?.message ?: "Error desconocido del servidor"))
                     )
                     _uiState.update {
                         it.copy(
                             isLoading = false,
                             message = "Falló la sincronización con el servidor. Depósito de $formattedAmount para $customerName guardado como pendiente. Error: ${serverResult.exceptionOrNull()?.message}",
-                            isError = true, // Hubo un error de sincronización
-                            depositSuccess = true // PERO se guardó como pendiente exitosamente
+                            isError = true,
+                            depositSuccess = true
                         )
                     }
                 }
             } else {
-                // Modo Offline: Guardar como pendiente SIN actualizar saldo local
                 pendingOperationRepository.addOperation(
                     type = pendingOperationType,
                     data = operationData
@@ -207,8 +197,8 @@ class DepositViewModel @Inject constructor(
                     it.copy(
                         isLoading = false,
                         message = "Estás offline. Depósito de $formattedAmount para $customerName guardado como pendiente.",
-                        isError = false, // No es un error, es comportamiento offline esperado
-                        depositSuccess = true // Se guardó como pendiente exitosamente
+                        isError = false,
+                        depositSuccess = true
                     )
                 }
             }

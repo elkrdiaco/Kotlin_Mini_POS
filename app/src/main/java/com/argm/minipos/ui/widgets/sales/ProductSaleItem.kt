@@ -33,7 +33,7 @@ fun ProductSaleItem(
             .clickable(
                 onClick = { onProductClick() },
                 interactionSource = interactionSource,
-                indication = rememberRipple() // Corrected ripple
+                indication = rememberRipple()
             )
             .padding(vertical = 12.dp, horizontal = 8.dp),
         verticalAlignment = Alignment.CenterVertically,

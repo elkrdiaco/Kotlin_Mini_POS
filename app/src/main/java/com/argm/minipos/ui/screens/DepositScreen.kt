@@ -11,13 +11,12 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
-// Asegúrate que las siguientes importaciones sean correctas para tu estructura de proyecto
 import com.argm.minipos.ui.navigation.AppScreens
-import com.argm.minipos.ui.screens.customer.SELECTED_CUSTOMER_RUT_KEY
 import com.argm.minipos.ui.theme.MiniPOSTheme
 import com.argm.minipos.ui.viewmodel.DepositViewModel
-// import com.argm.minipos.ui.viewmodel.DepositUiState // No es necesario importar UiState aquí si no se usa en Preview
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -26,7 +25,15 @@ fun DepositScreen(
     depositViewModel: DepositViewModel = hiltViewModel()
 ) {
     val uiState by depositViewModel.uiState.collectAsState()
-    val lifecycleOwner = LocalLifecycleOwner.current
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    val localUiState = uiState // para evitar capturar uiState directamente en LaunchedEffect
+
+    LaunchedEffect(localUiState.message) {
+        if (localUiState.message != null && !localUiState.isError) {
+            delay(3000)
+            depositViewModel.clearMessage()
+        }
+    }
 
     LaunchedEffect(key1 = lifecycleOwner, key2 = navController.currentBackStackEntry) {
         navController.currentBackStackEntry?.savedStateHandle?.getLiveData<String>(SELECTED_CUSTOMER_RUT_KEY)
@@ -52,8 +59,6 @@ fun DepositScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-
-                // Selección de Cliente
                 if (uiState.selectedCustomerRut != null) {
                     Text("Cliente: ${uiState.selectedCustomerName ?: uiState.selectedCustomerRut}")
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -74,7 +79,6 @@ fun DepositScreen(
                     }
                 }
 
-                // Campo para el Monto
                 OutlinedTextField(
                     value = uiState.amount,
                     onValueChange = { depositViewModel.onAmountChange(it) },
@@ -84,13 +88,11 @@ fun DepositScreen(
                     modifier = Modifier.fillMaxWidth(),
                     isError = uiState.isError,
                     supportingText = {
-                        if (uiState.isError && uiState.message != null) { // Mostrar mensaje solo si es error y hay mensaje
+                        if (uiState.isError && uiState.message != null) {
                             Text(uiState.message!!, color = MaterialTheme.colorScheme.error)
                         }
                     }
                 )
-
-                // Switch de Conexión Online/Offline
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth(),
@@ -102,9 +104,6 @@ fun DepositScreen(
                         onCheckedChange = { depositViewModel.onOnlineStatusChange(it) }
                     )
                 }
-                // No se necesita Spacer aquí porque Column ya tiene spacedBy(16.dp)
-
-                // Botón para Realizar Depósito
                 Button(
                     onClick = { depositViewModel.performDeposit() },
                     enabled = !uiState.isLoading && uiState.selectedCustomerRut != null && uiState.amount.isNotBlank(),
@@ -117,13 +116,10 @@ fun DepositScreen(
                     }
                 }
 
-                // Mensajes generales (éxito o mensajes informativos)
-                // Se mostrará si NO es un error (los errores de campo los muestra el OutlinedTextField si isError y message están seteados)
-                // Y si depositSuccess es true (para mostrar el mensaje de éxito combinado)
                 if (uiState.depositSuccess && uiState.message != null) {
                     Text(
                         text = uiState.message!!,
-                        color = MaterialTheme.colorScheme.primary // Asumiendo éxito
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
             }

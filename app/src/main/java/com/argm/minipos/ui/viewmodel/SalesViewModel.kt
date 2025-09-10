@@ -2,11 +2,10 @@ package com.argm.minipos.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.argm.minipos.data.model.Customer // Asumiendo que tienes un modelo Customer
 import com.argm.minipos.data.model.Product
 import com.argm.minipos.data.model.Sale
 import com.argm.minipos.data.model.SaleItem
-import com.argm.minipos.data.repository.CustomerRepository // <<<--- AÑADIR IMPORTACIÓN
+import com.argm.minipos.data.repository.CustomerRepository
 import com.argm.minipos.data.repository.ProductRepository
 import com.argm.minipos.data.repository.SaleRepository
 import com.argm.minipos.util.UiResult
@@ -15,7 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.firstOrNull // Para obtener el valor actual del Flow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -36,7 +35,7 @@ data class SalesUiState(
     val errorMessage: String? = null,
     val infoMessage: String? = null,
     val selectedCustomerRut: String? = null,
-    val selectedCustomerName: String? = null, // Podrías añadir para mostrar nombre
+    val selectedCustomerName: String? = null,
     val showSaleSuccessDialog: Boolean = false
 )
 
@@ -44,7 +43,7 @@ data class SalesUiState(
 class SalesViewModel @Inject constructor(
     private val productRepository: ProductRepository,
     private val saleRepository: SaleRepository,
-    private val customerRepository: CustomerRepository // <<<--- INYECTAR CustomerRepository
+    private val customerRepository: CustomerRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SalesUiState())
@@ -190,8 +189,6 @@ class SalesViewModel @Inject constructor(
                 _uiState.value = _uiState.value.copy(isLoading = false, errorMessage = "El carrito está vacío.", showSaleSuccessDialog = false)
                 return@launch
             }
-
-            // --- LÓGICA DE VALIDACIÓN Y DESCUENTO DE SALDO ---
             if (selectedRut != null) {
                 val customer = customerRepository.getCustomerByRut(selectedRut).firstOrNull()
                 if (customer == null) {
@@ -211,13 +208,10 @@ class SalesViewModel @Inject constructor(
                         _uiState.value = _uiState.value.copy(isLoading = false, errorMessage = "Error al descontar saldo: ${deductResult.message}", showSaleSuccessDialog = false)
                         return@launch
                     }
-                    is UiResult.Success -> {
-                        // Saldo descontado con éxito
-                    }
-                    else -> { /* No es UiResult.Loading en este caso */ }
+                    is UiResult.Success -> {}
+                    else -> {}
                 }
             }
-            // --- FIN LÓGICA DE VALIDACIÓN Y DESCUENTO ---
 
             val saleToSave = Sale(
                 timestamp = Date(),
@@ -253,7 +247,6 @@ class SalesViewModel @Inject constructor(
                         errorMessage = result.message ?: "Error desconocido al finalizar la venta.",
                         infoMessage = null,
                         showSaleSuccessDialog = false
-                        // Considerar lógica de compensación aquí si el descuento fue exitoso pero la venta falló.
                     )
                 }
                 is UiResult.Loading -> {

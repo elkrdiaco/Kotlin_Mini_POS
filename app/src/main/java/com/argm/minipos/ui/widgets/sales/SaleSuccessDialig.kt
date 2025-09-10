@@ -21,33 +21,33 @@ fun SaleSuccessDialog(
     onDismiss: () -> Unit
 ) {
     AlertDialog(
-        onDismissRequest = onDismiss, // Permite cerrar el diálogo tocando fuera (opcional)
-        icon = { // El ícono se puede poner aquí para que esté alineado con el título
+        onDismissRequest = onDismiss,
+        icon = {
             Icon(
                 imageVector = Icons.Filled.CheckCircle,
                 contentDescription = "Venta Exitosa",
-                modifier = Modifier.size(48.dp), // Un poco más grande para el diálogo
+                modifier = Modifier.size(48.dp),
                 tint = MaterialTheme.colorScheme.primary
             )
         },
         title = {
             Text(
                 text = "¡Éxito!",
-                modifier = Modifier.fillMaxWidth(), // Para que el textAlign funcione bien
-                textAlign = TextAlign.Center // Centra el título
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
             )
         },
         text = {
             Text(
                 text = successMessage,
-                modifier = Modifier.fillMaxWidth(), // Para que el textAlign funcione bien
-                textAlign = TextAlign.Center // Centra el mensaje
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
             )
         },
         confirmButton = {
             Row(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.Center // Centra el botón
+                horizontalArrangement = Arrangement.Center
             ) {
                 Button(onClick = onDismiss) {
                     Text("Aceptar")

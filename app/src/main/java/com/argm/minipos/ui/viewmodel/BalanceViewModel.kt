@@ -19,11 +19,10 @@ interface BalanceService {
 
 class SimulatedBalanceService @Inject constructor() : BalanceService {
     override suspend fun getBalance(accountId: String): Result<String> {
-        delay(Random.nextLong(500, 801)) // Simulate network delay
-        return if (Random.nextFloat() < 0.2) { // 20% chance of error
+        delay(Random.nextLong(500, 801))
+        return if (Random.nextFloat() < 0.2) {
             Result.failure(Exception("Error al obtener el saldo (Simulado)"))
         } else {
-            // Simulate different balances based on accountId or just a fixed one
             if (accountId.isBlank()) {
                  Result.failure(IllegalArgumentException("El ID de cuenta no puede estar vacío"))
             } else {
@@ -53,7 +52,7 @@ class BalanceViewModel @Inject constructor(
         _uiState.update { currentState ->
             currentState.copy(
                 accountId = newAccountId,
-                accountIdError = null // Clear previous error on new input
+                accountIdError = null
             )
         }
     }
@@ -64,9 +63,7 @@ class BalanceViewModel @Inject constructor(
             _uiState.update { it.copy(accountIdError = "El RUT o N° de cuenta no puede estar vacío.") }
             return
         }
-        // Basic validation for RUT-like structure (very simplified)
-        // A more robust validation would be needed for a real app
-        if (!currentAccountId.matches(Regex("""^(\d{1,8}-?[\dkK])$"""))) { // Changed to raw string
+        if (!currentAccountId.matches(Regex("""^(\d{1,8}-?[\dkK])$"""))) {
              _uiState.update { it.copy(accountIdError = "Formato de RUT o N° de cuenta inválido.") }
             return
         }

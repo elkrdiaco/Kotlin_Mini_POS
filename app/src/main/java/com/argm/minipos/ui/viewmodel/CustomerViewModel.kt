@@ -21,20 +21,14 @@ class CustomerViewModel @Inject constructor(
     private val _customers = MutableStateFlow<UiResult<List<Customer>>>(UiResult.Loading())
     val customers: StateFlow<UiResult<List<Customer>>> = _customers.asStateFlow()
 
-    // Initial state for selectedCustomer can be Success(null) if "no selection" is a valid success state.
-    // Or UiResult.Loading() if you want to explicitly load a customer initially.
     private val _selectedCustomer = MutableStateFlow<UiResult<Customer?>>(UiResult.Success(null))
-    val selectedCustomer: StateFlow<UiResult<Customer?>> = _selectedCustomer.asStateFlow()
 
     private val _addCustomerResult = MutableStateFlow<UiResult<Customer>>(UiResult.Loading())
     val addCustomerResult: StateFlow<UiResult<Customer>> = _addCustomerResult.asStateFlow()
     
     private val _recordDepositResult = MutableStateFlow<UiResult<Unit>>(UiResult.Loading())
-    val recordDepositResult: StateFlow<UiResult<Unit>> = _recordDepositResult.asStateFlow()
 
     private val _syncDepositsResult = MutableStateFlow<UiResult<String>>(UiResult.Loading()) // String para el mensaje de éxito/error
-    val syncDepositsResult: StateFlow<UiResult<String>> = _syncDepositsResult.asStateFlow()
-
 
     init {
         loadAllCustomers()
@@ -93,22 +87,19 @@ class CustomerViewModel @Inject constructor(
                 _recordDepositResult.value = UiResult.Error("Invalid customer RUT or amount.")
                 return@launch
             }
-            
+
             val result = customerRepository.recordDeposit(customerRut, amount, isOffline)
             _recordDepositResult.value = result
 
-            // Optional: recargar el cliente seleccionado si sus datos cambiaron y están siendo mostrados
-            // y si el depósito fue exitoso y online (lo que cambiaría el saldo inmediatamente)
             if (result is UiResult.Success && !isOffline) {
                 if (_selectedCustomer.value is UiResult.Success && (_selectedCustomer.value as UiResult.Success<Customer?>).data?.rut == customerRut) {
                     getCustomerByRut(customerRut)
                 }
-                 // Consider reloading all customers as well if balances are shown in the list
                 loadAllCustomers()
             }
         }
     }
-    
+
     fun clearRecordDepositResult() {
          _recordDepositResult.value = UiResult.Loading()
     }
@@ -122,7 +113,7 @@ class CustomerViewModel @Inject constructor(
             }
             val result = customerRepository.syncPendingDepositsForCustomer(customerRut)
             _syncDepositsResult.value = result
-            
+
             if (result is UiResult.Success) {
                 if (_selectedCustomer.value is UiResult.Success && (_selectedCustomer.value as UiResult.Success<Customer?>).data?.rut == customerRut) {
                    getCustomerByRut(customerRut)
@@ -132,7 +123,7 @@ class CustomerViewModel @Inject constructor(
             }
         }
     }
-    
+
     fun clearSyncDepositsResult() {
         _syncDepositsResult.value = UiResult.Loading()
     }

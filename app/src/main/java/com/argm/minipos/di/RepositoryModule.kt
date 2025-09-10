@@ -47,13 +47,13 @@ abstract class RepositoryModule {
     ): CustomerRepository
 
     @Binds
-    @Singleton // Hace que BalanceService sea un singleton
+    @Singleton
     abstract fun bindBalanceService(
         simulatedBalanceService: SimulatedBalanceService
     ): BalanceService
 
     @Binds
-    @Singleton // Hace que DepositService sea un singleton
+    @Singleton
     abstract fun bindDepositService(
         simulatedDepositService: SimulatedDepositService
     ): DepositService

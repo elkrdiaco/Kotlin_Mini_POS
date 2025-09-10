@@ -24,14 +24,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.argm.minipos.data.repository.PendingOperation // Importa la clase correcta
+import com.argm.minipos.data.repository.PendingOperation
 import com.argm.minipos.ui.viewmodel.SyncViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-
-// PendingOperation data class is now expected from com.argm.minipos.data.repository
-// If it was also defined locally in this file previously, that local definition should be removed.
 
 @Composable
 fun SyncScreen(
@@ -106,7 +103,7 @@ fun PendingOperationItem(operation: PendingOperation) {
                 style = MaterialTheme.typography.bodySmall
             )
             Text(
-                "Estado: ${operation.status}", // Displaying status
+                "Estado: ${operation.status}",
                 style = MaterialTheme.typography.bodySmall
             )
             if (operation.attempts > 0) {
@@ -130,12 +127,6 @@ fun PendingOperationItem(operation: PendingOperation) {
 @Composable
 fun SyncScreenPreview() {
     MaterialTheme {
-        // Previewing SyncScreen might be tricky if it directly relies on a Hilt ViewModel.
-        // For a more robust preview, you might pass a fake UiState or a fake ViewModel.
-        // For now, this will use the default constructor of SyncViewModel if Hilt is not fully active in preview.
-        SyncScreen(
-            // You can create a fake SyncViewModel for preview if needed:
-            // syncViewModel = FakeSyncViewModel()
-        )
+        SyncScreen()
     }
 }

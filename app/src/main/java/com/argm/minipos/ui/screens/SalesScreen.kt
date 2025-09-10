@@ -34,8 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.argm.minipos.ui.navigation.AppScreens // <<<--- IMPORTAR AppScreens
-import com.argm.minipos.ui.screens.customer.SELECTED_CUSTOMER_RUT_KEY
+import com.argm.minipos.ui.navigation.AppScreens
 import com.argm.minipos.ui.viewmodel.SalesViewModel
 import com.argm.minipos.ui.widgets.sales.ProductList
 
@@ -47,8 +46,6 @@ fun SalesScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
-
-    // Observar el resultado de CustomerListScreen
     val currentBackStackEntry = navController.currentBackStackEntry
     LaunchedEffect(currentBackStackEntry) {
         currentBackStackEntry?.savedStateHandle?.getLiveData<String>(SELECTED_CUSTOMER_RUT_KEY)
@@ -107,18 +104,17 @@ fun SalesScreen(
                 .padding(innerPadding)
                 .padding(horizontal = 8.dp, vertical = 8.dp)
         ) {
-            // Sección para seleccionar/mostrar cliente
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 8.dp), // Espacio después de esta fila
+                    .padding(bottom = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
                     text = uiState.selectedCustomerRut?.let { "Cliente: $it" } ?: "Venta sin cliente",
                     style = MaterialTheme. typography.bodyLarge,
-                    modifier = Modifier.weight(1f) // Para que el texto tome espacio y el botón no lo empuje
+                    modifier = Modifier.weight(1f)
                 )
                 Button(onClick = { navController.navigate(AppScreens.CUSTOMER_LIST_SCREEN) }) {
                     Text(if (uiState.selectedCustomerRut == null) "Seleccionar Cliente" else "Cambiar Cliente")

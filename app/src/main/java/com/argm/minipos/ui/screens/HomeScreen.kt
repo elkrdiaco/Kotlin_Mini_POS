@@ -75,18 +75,17 @@ fun HomeScreen(
             }
         }
     ) { innerPadding ->
-        // Envolvemos el contenido principal y los nuevos botones en un Column
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding) // Aplicamos el padding del Scaffold aquí
-                .padding(16.dp), // Un padding adicional para el contenido de la columna
+                .padding(innerPadding)
+                .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top // O .Center si prefieres los botones centrados verticalmente
+            verticalArrangement = Arrangement.Top
         ) {
 
             HomeScreenMainContent(
-                modifier = Modifier.fillMaxWidth(), // HomeScreenMainContent ahora ocupa el ancho disponible
+                modifier = Modifier.fillMaxWidth(),
                 uiState = uiState,
                 navController = navController
             )
