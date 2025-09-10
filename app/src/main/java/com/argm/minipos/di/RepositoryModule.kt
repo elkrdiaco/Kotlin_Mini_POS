@@ -1,5 +1,7 @@
 package com.argm.minipos.di
 
+import com.argm.minipos.data.repository.CustomerRepository
+import com.argm.minipos.data.repository.CustomerRepositoryImpl
 import com.argm.minipos.data.repository.InMemoryPendingOperationRepository
 import com.argm.minipos.data.repository.PendingOperationRepository
 import com.argm.minipos.data.repository.ProductRepository
@@ -37,6 +39,12 @@ abstract class RepositoryModule {
     abstract fun bindPendingOperationRepository(
         inMemoryPendingOperationRepository: InMemoryPendingOperationRepository
     ): PendingOperationRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindCustomerRepository(
+        customerRepositoryImpl: CustomerRepositoryImpl
+    ): CustomerRepository
 
     @Binds
     @Singleton // Hace que BalanceService sea un singleton

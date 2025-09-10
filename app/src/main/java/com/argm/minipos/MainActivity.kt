@@ -17,6 +17,8 @@ import com.argm.minipos.ui.screens.HomeScreen
 import com.argm.minipos.ui.screens.SalesHistoryScreen
 import com.argm.minipos.ui.screens.SalesScreen
 import com.argm.minipos.ui.screens.SyncScreen
+// Importar CustomerListScreen
+import com.argm.minipos.ui.screens.customer.CustomerListScreen 
 import com.argm.minipos.ui.theme.MiniPOSTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -50,15 +52,17 @@ fun MiniPosApp() {
         composable(AppScreens.SALES_HISTORY_SCREEN) {
             SalesHistoryScreen(navController = navController)
         }
-
         composable(AppScreens.DEPOSIT_SCREEN) {
-            DepositScreen()
+            DepositScreen(navController = navController)
         }
         composable(AppScreens.SYNC_SCREEN) {
             SyncScreen()
         }
-        composable(AppScreens.BALANCE_SCREEN) { // <<<--- AÑADE ESTE BLOQUE
-            BalanceScreen( /* navController = navController */ ) // BalanceScreen podría o no necesitar navController
+        composable(AppScreens.BALANCE_SCREEN) {
+            BalanceScreen( /* navController = navController */ )
+        }
+        composable(AppScreens.CUSTOMER_LIST_SCREEN) {
+            CustomerListScreen( navController = navController )
         }
     }
 }

@@ -10,5 +10,6 @@ data class Sale(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     val timestamp: Date,
-    val totalAmount: BigDecimal
+    val totalAmount: BigDecimal,
+    val customerRut: String? = null
 )

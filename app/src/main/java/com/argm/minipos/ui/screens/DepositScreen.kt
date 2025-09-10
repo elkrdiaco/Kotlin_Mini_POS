@@ -1,86 +1,132 @@
-package com.argm.minipos.ui.screens
+package com.argm.minipos.ui.screens // o com.argm.minipos.ui.screens.deposit
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Switch
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+// Asegúrate que las siguientes importaciones sean correctas para tu estructura de proyecto
+import com.argm.minipos.ui.navigation.AppScreens
+import com.argm.minipos.ui.screens.customer.SELECTED_CUSTOMER_RUT_KEY
+import com.argm.minipos.ui.theme.MiniPOSTheme
 import com.argm.minipos.ui.viewmodel.DepositViewModel
+// import com.argm.minipos.ui.viewmodel.DepositUiState // No es necesario importar UiState aquí si no se usa en Preview
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DepositScreen(depositViewModel: DepositViewModel = hiltViewModel()) {
+fun DepositScreen(
+    navController: NavController,
+    depositViewModel: DepositViewModel = hiltViewModel()
+) {
     val uiState by depositViewModel.uiState.collectAsState()
+    val lifecycleOwner = LocalLifecycleOwner.current
 
-    Column(
-        modifier = Modifier
-            .padding(16.dp)
-            .fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Spacer(modifier = Modifier.height(50.dp))
-        OutlinedTextField(
-            value = uiState.amount,
-            onValueChange = { depositViewModel.onAmountChange(it) },
-            label = { Text("Monto del depósito") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            modifier = Modifier.fillMaxWidth(),
-            isError = uiState.amountError != null,
-            supportingText = {
-                uiState.amountError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+    LaunchedEffect(key1 = lifecycleOwner, key2 = navController.currentBackStackEntry) {
+        navController.currentBackStackEntry?.savedStateHandle?.getLiveData<String>(SELECTED_CUSTOMER_RUT_KEY)
+            ?.observe(lifecycleOwner) { rut ->
+                if (rut != null) {
+                    depositViewModel.onCustomerSelected(rut)
+                    navController.currentBackStackEntry?.savedStateHandle?.remove<String>(SELECTED_CUSTOMER_RUT_KEY)
+                }
             }
-        )
+    }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Simular Conexión Online")
-            Spacer(modifier = Modifier.width(8.dp))
-            Switch(
-                checked = uiState.isOnline,
-                onCheckedChange = { depositViewModel.onOnlineStatusChange(it) }
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
-            onClick = { depositViewModel.performDeposit() },
-            enabled = !uiState.isLoading
-        ) {
-            if (uiState.isLoading) {
-                CircularProgressIndicator(modifier = Modifier.height(24.dp))
-            } else {
-                Text("Depositar")
+    MiniPOSTheme {
+        Scaffold(
+            topBar = {
+                TopAppBar(title = { Text("Realizar Depósito a Cliente") })
             }
-        }
+        ) { paddingValues ->
+            Column(
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .padding(16.dp)
+                    .fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
 
-        Spacer(modifier = Modifier.height(16.dp))
+                // Selección de Cliente
+                if (uiState.selectedCustomerRut != null) {
+                    Text("Cliente: ${uiState.selectedCustomerName ?: uiState.selectedCustomerRut}")
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Button(onClick = {
+                            navController.navigate(AppScreens.CUSTOMER_LIST_SCREEN)
+                        }) {
+                            Text("Cambiar")
+                        }
+                        Button(onClick = { depositViewModel.clearCustomerSelection() }) {
+                            Text("Limpiar")
+                        }
+                    }
+                } else {
+                    Button(onClick = {
+                        navController.navigate(AppScreens.CUSTOMER_LIST_SCREEN)
+                    }) {
+                        Text("Seleccionar Cliente")
+                    }
+                }
 
-        uiState.operationResult?.let {
-            Text(it, color = if (uiState.isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary)
+                // Campo para el Monto
+                OutlinedTextField(
+                    value = uiState.amount,
+                    onValueChange = { depositViewModel.onAmountChange(it) },
+                    label = { Text("Monto del Depósito") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    isError = uiState.isError,
+                    supportingText = {
+                        if (uiState.isError && uiState.message != null) { // Mostrar mensaje solo si es error y hay mensaje
+                            Text(uiState.message!!, color = MaterialTheme.colorScheme.error)
+                        }
+                    }
+                )
+
+                // Switch de Conexión Online/Offline
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text("Simular Conexión Online")
+                    Switch(
+                        checked = uiState.isOnline,
+                        onCheckedChange = { depositViewModel.onOnlineStatusChange(it) }
+                    )
+                }
+                // No se necesita Spacer aquí porque Column ya tiene spacedBy(16.dp)
+
+                // Botón para Realizar Depósito
+                Button(
+                    onClick = { depositViewModel.performDeposit() },
+                    enabled = !uiState.isLoading && uiState.selectedCustomerRut != null && uiState.amount.isNotBlank(),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    if (uiState.isLoading) {
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary)
+                    } else {
+                        Text("Depositar a Cliente")
+                    }
+                }
+
+                // Mensajes generales (éxito o mensajes informativos)
+                // Se mostrará si NO es un error (los errores de campo los muestra el OutlinedTextField si isError y message están seteados)
+                // Y si depositSuccess es true (para mostrar el mensaje de éxito combinado)
+                if (uiState.depositSuccess && uiState.message != null) {
+                    Text(
+                        text = uiState.message!!,
+                        color = MaterialTheme.colorScheme.primary // Asumiendo éxito
+                    )
+                }
+            }
         }
     }
 }
@@ -88,7 +134,5 @@ fun DepositScreen(depositViewModel: DepositViewModel = hiltViewModel()) {
 @Preview(showBackground = true)
 @Composable
 fun DepositScreenPreview() {
-    // Preview con un ViewModel de Hilt puede requerir configuración adicional
-    // o un ViewModel falso para una previsualización aislada.
-    DepositScreen()
+    Text("Preview no disponible para esta pantalla completa con NavController y ViewModel.")
 }

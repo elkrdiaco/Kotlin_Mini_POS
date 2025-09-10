@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalance
+import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.outlined.AccountBalanceWallet
 import androidx.compose.material.icons.outlined.ProductionQuantityLimits
@@ -58,14 +59,6 @@ fun HomeScreenMainContent(
         ) {
             Icon(Icons.Filled.Sync, contentDescription = "Sincronización", modifier = Modifier.padding(end = 8.dp))
             Text("Ir a Sincronización")
-        }
-        Spacer(modifier = Modifier.height(8.dp)) // Espacio antes del nuevo botón
-        Button( // <<<--- NUEVO BOTÓN PARA BALANCE
-            onClick = { navController.navigate(AppScreens.BALANCE_SCREEN) },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Icon(Icons.Filled.AccountBalance, contentDescription = "Balance", modifier = Modifier.padding(end = 8.dp))
-            Text("Consultar Balance")
         }
         Spacer(modifier = Modifier.height(8.dp))
         Button(

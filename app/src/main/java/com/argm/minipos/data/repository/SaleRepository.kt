@@ -7,7 +7,7 @@ import com.argm.minipos.util.UiResult
 import kotlinx.coroutines.flow.Flow
 
 interface SaleRepository {
-    suspend fun finalizeSale(sale: Sale, items: List<SaleItem>): UiResult<String>
+    suspend fun finalizeSale(sale: Sale, items: List<SaleItem>, customerRut: String?): UiResult<String>
 
     fun getSalesHistory(): Flow<List<SaleWithItems>>
 }

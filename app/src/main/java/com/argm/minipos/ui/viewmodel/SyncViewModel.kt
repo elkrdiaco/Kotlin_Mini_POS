@@ -2,8 +2,10 @@ package com.argm.minipos.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.argm.minipos.data.repository.CustomerRepository // Importar CustomerRepository
 import com.argm.minipos.data.repository.PendingOperation
 import com.argm.minipos.data.repository.PendingOperationRepository
+import com.argm.minipos.util.UiResult // Importar UiResult si CustomerRepository lo usa
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -23,8 +25,8 @@ data class SyncUiState(
 @HiltViewModel
 class SyncViewModel @Inject constructor(
     private val pendingOperationRepository: PendingOperationRepository,
-    private val depositService: DepositService // To re-process deposits
-    // Add other services if you have other types of pending operations
+    private val depositService: DepositService,
+    private val customerRepository: CustomerRepository // Añadido CustomerRepository
 ) : ViewModel() {
 
     private val _isLoading = MutableStateFlow(false)
@@ -52,66 +54,133 @@ class SyncViewModel @Inject constructor(
     fun synchronizePendingOperations() {
         viewModelScope.launch {
             _isLoading.value = true
-            _syncStatusMessage.value = null
+            _syncStatusMessage.value = "Iniciando sincronización..."
             _isError.value = false
-            var operationsProcessed = 0
-            var operationsFailed = 0
+            var operationsProcessedSuccessfully = 0
+            var operationsFailedOrRetried = 0
 
-            val operationsToSync = uiState.value.pendingOperations.toList() // Work on a copy
+            // Corrected filter: uses operation.type for specific types and operation.status for generic retryable states.
+            val operationsToSync = uiState.value.pendingOperations.filter { operation ->
+                operation.type == "DEPOSIT_AWAITING_SYNC_AND_BALANCE_UPDATE" ||
+                        operation.type == "DEPOSIT_SERVER_OK_LOCAL_BALANCE_FAILED" ||
+                        (operation.status == "PENDING" || operation.status == "FAILED_RETRY") // Catch general pending/retry
+            }.toList()
 
             if (operationsToSync.isEmpty()) {
-                _syncStatusMessage.value = "No hay operaciones para sincronizar."
+                val totalPending = uiState.value.pendingOperations.size
+                _syncStatusMessage.value = if (totalPending > 0) "No hay operaciones que requieran acción inmediata (podrían estar ya procesadas o en un estado final)." else "No hay operaciones para sincronizar."
                 _isLoading.value = false
                 return@launch
             }
 
             operationsToSync.forEach { operation ->
-                // Mark as processing
-                pendingOperationRepository.updateOperation(operation.copy(status = "PROCESSING", lastAttemptTimestamp = System.currentTimeMillis()))
+                // Ensure we don't re-process an operation within the same sync batch if its status changes
+                val currentOperationState = pendingOperationRepository.getOperation(operation.id) ?: return@forEach
+                if (currentOperationState.status == "PROCESSING" || currentOperationState.status == "SYNCED_AND_BALANCED" || currentOperationState.status.contains("PERMANENTLY")) {
+                    return@forEach // Skip if already processing or in a final state
+                }
 
-                var success = false
+                pendingOperationRepository.updateOperation(currentOperationState.copy(status = "PROCESSING", lastAttemptTimestamp = System.currentTimeMillis()))
+
                 try {
-                    when (operation.type) {
-                        "DEPOSIT" -> {
-                            val amount = operation.data["amount"] as? Double
-                            // We assume 'isOnline' is true for sync attempts.
-                            // The original 'isOnline' status at time of creation might be in operation.data if needed.
-                            if (amount != null) {
-                                val result = depositService.makeDeposit(amount, isOnline = true)
-                                if (result.isSuccess) {
-                                    pendingOperationRepository.deleteOperations(listOf(operation.id))
-                                    operationsProcessed++
-                                    success = true
-                                } else {
-                                    operationsFailed++
-                                    val newAttempts = operation.attempts + 1
+                    when (currentOperationState.type) {
+                        "DEPOSIT_AWAITING_SYNC_AND_BALANCE_UPDATE" -> {
+                            val rut = currentOperationState.data["rut"] as? String
+                            val amount = currentOperationState.data["amount"] as? Double
+
+                            if (rut == null || amount == null) {
+                                operationsFailedOrRetried++
+                                pendingOperationRepository.updateOperation(currentOperationState.copy(status = "FAILED_INVALID_DATA"))
+                            } else {
+                                _syncStatusMessage.value = "Sincronizando ID ${currentOperationState.id.take(6)} (Servidor)..."
+                                val serverResult = depositService.makeDeposit(amount, isOnline = true)
+
+                                if (serverResult.isSuccess) {
+                                    _syncStatusMessage.value = "ID ${currentOperationState.id.take(6)} OK (Servidor). Actualizando local..."
+                                    val localResult = customerRepository.addBalanceToCustomer(rut, amount)
+                                    when (localResult) {
+                                        is UiResult.Success -> {
+                                            pendingOperationRepository.deleteOperations(listOf(currentOperationState.id))
+                                            operationsProcessedSuccessfully++
+                                        }
+                                        is UiResult.Error -> {
+                                            operationsFailedOrRetried++
+                                            val newAttempts = currentOperationState.attempts + 1
+                                            pendingOperationRepository.updateOperation(
+                                                currentOperationState.copy(
+                                                    status = if (newAttempts >= MAX_SYNC_ATTEMPTS) "FAILED_LOCAL_BALANCE_PERMANENTLY" else "FAILED_LOCAL_BALANCE_RETRY",
+                                                    attempts = newAttempts,
+                                                    lastAttemptTimestamp = System.currentTimeMillis()
+                                                )
+                                            )
+                                        }
+                                        else -> {}
+                                    }
+                                } else { // Fallo del servidor
+                                    operationsFailedOrRetried++
+                                    val newAttempts = currentOperationState.attempts + 1
                                     pendingOperationRepository.updateOperation(
-                                        operation.copy(
+                                        currentOperationState.copy(
                                             attempts = newAttempts,
-                                            status = if (newAttempts >= MAX_SYNC_ATTEMPTS) "FAILED_PERMANENTLY" else "FAILED_RETRY",
+                                            status = if (newAttempts >= MAX_SYNC_ATTEMPTS) "FAILED_SERVER_SYNC_PERMANENTLY" else "FAILED_RETRY",
                                             lastAttemptTimestamp = System.currentTimeMillis()
                                         )
                                     )
                                 }
-                            } else {
-                                operationsFailed++ // Invalid data for deposit
-                                pendingOperationRepository.updateOperation(operation.copy(status = "FAILED_INVALID_DATA"))
                             }
                         }
-                        // Add cases for other operation types here
+                        "DEPOSIT_SERVER_OK_LOCAL_BALANCE_FAILED" -> {
+                            val rut = currentOperationState.data["rut"] as? String
+                            val amount = currentOperationState.data["amount"] as? Double
+                            if (rut == null || amount == null) {
+                                operationsFailedOrRetried++
+                                pendingOperationRepository.updateOperation(currentOperationState.copy(status = "FAILED_INVALID_DATA"))
+                            } else {
+                                _syncStatusMessage.value = "Reintentando ID ${currentOperationState.id.take(6)} (Local)..."
+                                val localResult = customerRepository.addBalanceToCustomer(rut, amount)
+                                when (localResult) {
+                                    is UiResult.Success -> {
+                                        pendingOperationRepository.deleteOperations(listOf(currentOperationState.id))
+                                        operationsProcessedSuccessfully++
+                                    }
+                                    is UiResult.Error -> {
+                                        operationsFailedOrRetried++
+                                        val newAttempts = currentOperationState.attempts + 1
+                                        pendingOperationRepository.updateOperation(
+                                            currentOperationState.copy(
+                                                status = if (newAttempts >= MAX_SYNC_ATTEMPTS) "FAILED_LOCAL_BALANCE_PERMANENTLY" else "FAILED_LOCAL_BALANCE_RETRY",
+                                                attempts = newAttempts,
+                                                lastAttemptTimestamp = System.currentTimeMillis()
+                                            )
+                                        )
+                                    }
+                                    else -> {}
+                                }
+                            }
+                        }
+                        // Consider other types if they exist and follow the "PENDING" or "FAILED_RETRY" status logic
                         else -> {
-                            // Unknown operation type, mark as failed or log
-                            operationsFailed++
-                            pendingOperationRepository.updateOperation(operation.copy(status = "FAILED_UNKNOWN_TYPE"))
+                            if (currentOperationState.status == "PENDING" || currentOperationState.status == "FAILED_RETRY") {
+                                // Generic handling for other types that might just need a server sync
+                                // For example, if you had a generic "DEPOSIT" type that implied local balance was already updated
+                                // _syncStatusMessage.value = "Procesando tipo genérico ${currentOperationState.type}..."
+                                // This section needs specific logic based on what other types mean.
+                                // For now, mark as unknown if not one of the specific customer deposit types.
+                                operationsFailedOrRetried++
+                                pendingOperationRepository.updateOperation(currentOperationState.copy(status = "FAILED_UNKNOWN_TYPE_IN_SYNC"))
+                            } else {
+                                // This operation was in operationsToSync but its type/status doesn't match known logic.
+                                // This should ideally not happen if the initial filter is correct.
+                            }
                         }
                     }
                 } catch (e: Exception) {
-                    operationsFailed++
-                    val newAttempts = operation.attempts + 1
+                    operationsFailedOrRetried++
+                    val newAttempts = currentOperationState.attempts + 1
                     pendingOperationRepository.updateOperation(
-                        operation.copy(
+                        currentOperationState.copy(
                             attempts = newAttempts,
-                            status = if (newAttempts >= MAX_SYNC_ATTEMPTS) "FAILED_PERMANENTLY" else "FAILED_RETRY",
+                            status = if (newAttempts >= MAX_SYNC_ATTEMPTS) "FAILED_UNEXPECTED_ERROR_PERMANENTLY" else "FAILED_RETRY",
                             lastAttemptTimestamp = System.currentTimeMillis()
                         )
                     )
@@ -119,13 +188,16 @@ class SyncViewModel @Inject constructor(
             }
 
             _isLoading.value = false
-            _syncStatusMessage.value = when {
-                operationsProcessed > 0 && operationsFailed == 0 -> "Sincronización completada. $operationsProcessed operaciones procesadas."
-                operationsProcessed > 0 && operationsFailed > 0 -> "Sincronización parcial. $operationsProcessed procesadas, $operationsFailed fallaron."
-                operationsProcessed == 0 && operationsFailed > 0 -> "Falló la sincronización de $operationsFailed operaciones."
-                else -> "No se procesaron operaciones (puede que la lista estuviera vacía o ya procesada)."
+            val finalMessage = when {
+                operationsToSync.isEmpty() && uiState.value.pendingOperations.isNotEmpty() -> "No hay operaciones que requieran sincronización en este momento."
+                operationsToSync.isEmpty() -> "No hay operaciones para sincronizar."
+                operationsProcessedSuccessfully > 0 && operationsFailedOrRetried == 0 -> "Sincronización completada. $operationsProcessedSuccessfully operaciones procesadas."
+                operationsProcessedSuccessfully > 0 && operationsFailedOrRetried > 0 -> "Sincronización parcial. $operationsProcessedSuccessfully procesadas, $operationsFailedOrRetried fallaron o requieren reintento."
+                operationsProcessedSuccessfully == 0 && operationsFailedOrRetried > 0 -> "Falló la sincronización de $operationsFailedOrRetried operaciones o requieren reintento."
+                else -> "No se procesaron nuevas operaciones o todas estaban en un estado final."
             }
-            _isError.value = operationsFailed > 0
+            _syncStatusMessage.value = finalMessage
+            _isError.value = operationsFailedOrRetried > 0
         }
     }
 

@@ -98,7 +98,9 @@ fun PendingOperationItem(operation: PendingOperation) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text("ID: ${operation.id}", style = MaterialTheme.typography.labelSmall)
             Text("Tipo: ${operation.type.uppercase()}", style = MaterialTheme.typography.titleSmall)
-            Text("Data: ${operation.data.map { "${it.key}: ${it.value}" }.joinToString()}", style = MaterialTheme.typography.bodyMedium)
+            Text("RUT: ${operation.data.getOrDefault("rut", "N/A")}", style = MaterialTheme.typography.titleSmall)
+            Text("Nombre: ${operation.data.getOrDefault("customerName", "N/A")}", style = MaterialTheme.typography.titleSmall)
+            Text("Monto del Deposito: ${operation.data.getOrDefault("amount", "N/A")}", style = MaterialTheme.typography.titleSmall)
             Text(
                 "Registrado: ${dateFormatter.format(Date(operation.timestamp))}",
                 style = MaterialTheme.typography.bodySmall
