@@ -4,7 +4,7 @@ import android.database.sqlite.SQLiteConstraintException
 import android.util.Log
 import androidx.room.withTransaction
 import com.argm.minipos.data.local.AppDatabase
-import com.argm.minipos.data.local.dao.CustomerDao
+import com.argm.minipos.data.local.dao.CustomerDao // Aunque se inyecte, ya no se usará aquí directamente para el saldo
 import com.argm.minipos.data.local.dao.ProductDao
 import com.argm.minipos.data.local.dao.SaleDao
 import com.argm.minipos.data.model.Sale
@@ -14,16 +14,17 @@ import com.argm.minipos.util.UiResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
-import java.math.BigDecimal
+// import java.math.BigDecimal // No es necesario si no se calcula aquí
 import javax.inject.Inject
 
 class StockInsufficientException(message: String) : Exception(message)
+// CustomerBalanceException puede que ya no se lance desde aquí si SalesViewModel lo maneja antes
 class CustomerBalanceException(message: String) : Exception(message)
 
 class SaleRepositoryImpl @Inject constructor(
     private val saleDao: SaleDao,
     private val productDao: ProductDao,
-    private val customerDao: CustomerDao, // Añadido CustomerDao
+    private val customerDao: CustomerDao, // Se mantiene inyectado por si acaso para otros usos, pero no para saldo aquí.
     private val appDatabase: AppDatabase
 ) : SaleRepository {
 
@@ -33,26 +34,35 @@ class SaleRepositoryImpl @Inject constructor(
 
             try {
                 appDatabase.withTransaction {
-                    // Lógica del cliente si se proporciona RUT
+                    // --- INICIO DE SECCIÓN A ELIMINAR/COMENTAR ---
+                    // La validación de cliente y saldo, y el descuento,
+                    // ahora se manejan en SalesViewModel antes de llamar a este método.
+                    /*
                     if (customerRut != null) {
-                        val customer = customerDao.getCustomerByRutOnce(customerRut)
-                            ?: throw CustomerBalanceException("Cliente con RUT $customerRut no encontrado.")
+                        // Esta lógica ahora está en SalesViewModel y CustomerRepository.
+                        // El ViewModel ya habrá validado y descontado el saldo.
+                        // Si se llega aquí, se asume que el cliente y su saldo son válidos.
 
-                        val totalAmountDouble = sale.totalAmount.toDouble()
-                        if (customer.balance < totalAmountDouble) {
-                            throw CustomerBalanceException(
-                                "Saldo insuficiente para el cliente RUT $customerRut. " +
-                                        "Saldo actual: ${customer.balance}, Requerido: $totalAmountDouble"
-                            )
-                        }
-                        val newBalance = customer.balance - totalAmountDouble
-                        customerDao.updateBalance(customerRut, newBalance)
+                        // val customer = customerDao.getCustomerByRutOnce(customerRut)
+                        //    ?: throw CustomerBalanceException("Cliente con RUT $customerRut no encontrado.")
+
+                        // val totalAmountDouble = sale.totalAmount.toDouble()
+                        // if (customer.balance < totalAmountDouble) {
+                        //    throw CustomerBalanceException(
+                        //        "Saldo insuficiente para el cliente RUT $customerRut. " +
+                        //                "Saldo actual: ${customer.balance}, Requerido: $totalAmountDouble"
+                        //    )
+                        // }
+                        // val newBalance = customer.balance - totalAmountDouble
+                        // customerDao.updateBalance(customerRut, newBalance)
                     }
+                    */
+                    // --- FIN DE SECCIÓN A ELIMINAR/COMENTAR ---
 
-                    // El objeto 'sale' que llega ya tiene el totalAmount y timestamp.
-                    // Ahora le asignamos el customerRut si existe, antes de insertarlo.
-                    val saleToInsert = sale.copy(customerRut = customerRut)
-                    generatedSaleId = saleDao.insertSale(saleToInsert)
+                    // El objeto 'sale' que llega ya tiene el totalAmount, timestamp y customerRut (si aplica).
+                    // El ViewModel es responsable de preparar este objeto 'Sale' correctamente.
+                    // Aquí, sale.customerRut ya debería venir asignado por el ViewModel.
+                    generatedSaleId = saleDao.insertSale(sale) // Usar 'sale' directamente
 
                     if (generatedSaleId <= 0) {
                         throw Exception("Error al insertar la venta, ID no generado.")
@@ -81,9 +91,9 @@ class SaleRepositoryImpl @Inject constructor(
             } catch (e: StockInsufficientException) {
                 Log.e("SaleRepositoryImpl", "Error de stock al finalizar venta: ${e.message}")
                 UiResult.Error(e.message ?: "Error de stock desconocido.")
-            } catch (e: CustomerBalanceException) {
-                Log.e("SaleRepositoryImpl", "Error de saldo de cliente: ${e.message}")
-                UiResult.Error(e.message ?: "Error de saldo de cliente desconocido.")
+            } catch (e: CustomerBalanceException) { // Esta excepción podría ya no ser relevante si se maneja antes
+                Log.e("SaleRepositoryImpl", "Error de saldo de cliente (desde SaleRepo - debería ser manejado antes): ${e.message}")
+                UiResult.Error(e.message ?: "Error de saldo de cliente desconocido (desde SaleRepo).")
             } catch (e: SQLiteConstraintException) {
                 Log.e("SaleRepositoryImpl", "Error de constraint SQLite (FK?): ${e.message}", e)
                 UiResult.Error("Error de datos al guardar la venta. Verifique los productos.")

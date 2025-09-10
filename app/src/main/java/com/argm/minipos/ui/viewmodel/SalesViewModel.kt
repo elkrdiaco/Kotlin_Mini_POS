@@ -54,8 +54,6 @@ class SalesViewModel @Inject constructor(
         loadProducts()
     }
 
-    // loadProducts, addProductToCart, removeProductFromCart, updateCartItemQuantity, updateCartState, clearCart (sin cambios)
-    // ... (estas funciones permanecen igual que en tu código original)
     fun loadProducts() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null, infoMessage = null, showSaleSuccessDialog = false)
@@ -166,7 +164,6 @@ class SalesViewModel @Inject constructor(
             cart = emptyList(),
             cartTotal = BigDecimal.ZERO,
             infoMessage = null,
-            // selectedCustomerRut = null, // Se limpia explícitamente tras venta exitosa o con función propia
             showSaleSuccessDialog = false
         )
     }
@@ -176,8 +173,7 @@ class SalesViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(selectedCustomerRut = rut, errorMessage = null, infoMessage = null, selectedCustomerName = null)
         if (rut != null) {
             viewModelScope.launch {
-                // Opcional: Cargar nombre del cliente para mostrarlo en la UI de ventas
-                val customer = customerRepository.getCustomerByRut(rut).firstOrNull() // Asumiendo que getCustomerByRut devuelve Flow
+                val customer = customerRepository.getCustomerByRut(rut).firstOrNull()
                 _uiState.value = _uiState.value.copy(selectedCustomerName = customer?.name)
             }
         }
@@ -197,20 +193,18 @@ class SalesViewModel @Inject constructor(
 
             // --- LÓGICA DE VALIDACIÓN Y DESCUENTO DE SALDO ---
             if (selectedRut != null) {
-                val customer = customerRepository.getCustomerByRut(selectedRut).firstOrNull() // Asume Flow, ajusta si es suspend fun
+                val customer = customerRepository.getCustomerByRut(selectedRut).firstOrNull()
                 if (customer == null) {
                     _uiState.value = _uiState.value.copy(isLoading = false, errorMessage = "Cliente no encontrado.", showSaleSuccessDialog = false)
                     return@launch
                 }
 
-                // Convertir BigDecimal a Double para comparación y deducción. Asegúrate que \`customer.balance\` sea Double.
                 val saleTotalDouble = currentCartTotal.toDouble()
                 if (customer.balance < saleTotalDouble) {
-                    _uiState.value = _uiState.value.copy(isLoading = false, errorMessage = "Saldo insuficiente. Saldo actual: ${customer.balance}, Total venta: $saleTotalDouble", showSaleSuccessDialog = false)
+                    _uiState.value = _uiState.value.copy(isLoading = false, errorMessage = "Saldo insuficiente. Saldo: ${customer.balance}, Venta: $saleTotalDouble", showSaleSuccessDialog = false)
                     return@launch
                 }
 
-                // Intentar deducir el saldo
                 val deductResult = customerRepository.deductBalanceFromCustomer(selectedRut, saleTotalDouble)
                 when (deductResult) {
                     is UiResult.Error -> {
@@ -218,15 +212,13 @@ class SalesViewModel @Inject constructor(
                         return@launch
                     }
                     is UiResult.Success -> {
-                        // Saldo descontado con éxito, continuar con la creación de la venta
-                        _uiState.value = _uiState.value.copy(infoMessage = "Saldo descontado correctamente.") // Mensaje intermedio opcional
+                        // Saldo descontado con éxito
                     }
-                    else -> { /* Podrías manejar Loading si deductBalanceFromCustomer lo emite */ }
+                    else -> { /* No es UiResult.Loading en este caso */ }
                 }
             }
             // --- FIN LÓGICA DE VALIDACIÓN Y DESCUENTO ---
 
-            // Si llegamos aquí, o no había cliente seleccionado, o el saldo fue suficiente y descontado.
             val saleToSave = Sale(
                 timestamp = Date(),
                 totalAmount = currentCartTotal,
@@ -243,8 +235,6 @@ class SalesViewModel @Inject constructor(
                 )
             }
 
-            // Llamar a saleRepository para guardar la venta
-            // selectedRut se pasa igual, puede ser útil para el repositorio aunque ya hayamos manejado el saldo.
             when (val result = saleRepository.finalizeSale(saleToSave, saleItemsToSave, selectedRut)) {
                 is UiResult.Success -> {
                     clearCart()
@@ -253,7 +243,7 @@ class SalesViewModel @Inject constructor(
                         infoMessage = "¡Venta finalizada con éxito! ID: ${result.data}",
                         errorMessage = null,
                         showSaleSuccessDialog = true,
-                        selectedCustomerRut = null, // Limpiar cliente seleccionado
+                        selectedCustomerRut = null,
                         selectedCustomerName = null
                     )
                 }
@@ -261,15 +251,13 @@ class SalesViewModel @Inject constructor(
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         errorMessage = result.message ?: "Error desconocido al finalizar la venta.",
-                        infoMessage = null, // Limpiar mensaje de descuento si lo hubo
+                        infoMessage = null,
                         showSaleSuccessDialog = false
-                        // Considerar si se debe revertir el descuento de saldo si la venta falla AQUÍ.
-                        // Esto requeriría una lógica de compensación (ej. customerRepository.addBalanceToCustomer(...))
-                        // Por simplicidad, esta propuesta no lo incluye.
+                        // Considerar lógica de compensación aquí si el descuento fue exitoso pero la venta falló.
                     )
                 }
                 is UiResult.Loading -> {
-                     _uiState.value = _uiState.value.copy(isLoading = true) // Mantener isLoading
+                    _uiState.value = _uiState.value.copy(isLoading = true)
                 }
             }
         }
@@ -280,7 +268,7 @@ class SalesViewModel @Inject constructor(
     }
 
     fun clearInfoMessage() {
-        if (!_uiState.value.showSaleSuccessDialog) { // Solo limpiar si el diálogo de éxito no está activo
+        if (!_uiState.value.showSaleSuccessDialog) {
             _uiState.value = _uiState.value.copy(infoMessage = null)
         }
     }
