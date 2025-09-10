@@ -53,7 +53,7 @@ fun CustomerListScreen(
                     val customers = result.data
                     if (customers.isEmpty()) {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text("No customers found. Click the '+' button to add one.")
+                            Text("No se encontro clientes. Click en el boton '+'.")
                         }
                     } else {
                         LazyColumn(
@@ -139,7 +139,7 @@ fun AddCustomerDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Add New Customer") },
+        title = { Text("Crear Nuevo Cliente") },
         text = {
             Column {
                 OutlinedTextField(
