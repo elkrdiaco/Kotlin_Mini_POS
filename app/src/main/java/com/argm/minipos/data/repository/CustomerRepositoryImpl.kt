@@ -6,7 +6,7 @@ import com.argm.minipos.data.local.dao.CustomerDao
 import com.argm.minipos.data.local.dao.PendingDepositDao
 import com.argm.minipos.data.model.Customer
 import com.argm.minipos.data.model.PendingDeposit
-import com.argm.minipos.util.UiResult
+import com.argm.minipos.utils.UiResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn

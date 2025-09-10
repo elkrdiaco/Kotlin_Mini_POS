@@ -1,4 +1,4 @@
-package com.argm.minipos.ui.screens // o com.argm.minipos.ui.screens.deposit
+package com.argm.minipos.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
@@ -6,12 +6,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import com.argm.minipos.ui.navigation.AppScreens
 import com.argm.minipos.ui.theme.MiniPOSTheme
@@ -26,7 +24,7 @@ fun DepositScreen(
 ) {
     val uiState by depositViewModel.uiState.collectAsState()
     val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
-    val localUiState = uiState // para evitar capturar uiState directamente en LaunchedEffect
+    val localUiState = uiState
 
     LaunchedEffect(localUiState.message) {
         if (localUiState.message != null && !localUiState.isError) {

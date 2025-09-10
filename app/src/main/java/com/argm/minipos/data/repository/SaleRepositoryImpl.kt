@@ -8,7 +8,7 @@ import com.argm.minipos.data.local.dao.SaleDao
 import com.argm.minipos.data.model.Sale
 import com.argm.minipos.data.model.SaleItem
 import com.argm.minipos.data.model.SaleWithItems
-import com.argm.minipos.util.UiResult
+import com.argm.minipos.utils.UiResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext

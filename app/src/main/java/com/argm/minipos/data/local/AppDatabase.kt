@@ -12,7 +12,7 @@ import com.argm.minipos.data.model.PendingDeposit
 import com.argm.minipos.data.model.Product
 import com.argm.minipos.data.model.Sale
 import com.argm.minipos.data.model.SaleItem
-import com.argm.minipos.util.Converters
+import com.argm.minipos.utils.Converters
 
 @Database(
     entities = [

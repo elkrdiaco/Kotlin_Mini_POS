@@ -12,7 +12,7 @@ import androidx.room.PrimaryKey
             entity = Customer::class,
             parentColumns = ["rut"],
             childColumns = ["customerRut"],
-            onDelete = ForeignKey.CASCADE // O la acción que prefieras
+            onDelete = ForeignKey.CASCADE
         )
     ],
     indices = [Index(value = ["customerRut"])]

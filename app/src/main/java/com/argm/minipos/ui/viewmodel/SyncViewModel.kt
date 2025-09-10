@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.argm.minipos.data.repository.CustomerRepository
 import com.argm.minipos.data.repository.PendingOperation
 import com.argm.minipos.data.repository.PendingOperationRepository
-import com.argm.minipos.util.UiResult
+import com.argm.minipos.utils.UiResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -75,7 +75,7 @@ class SyncViewModel @Inject constructor(
             operationsToSync.forEach { operation ->
                 val currentOperationState = pendingOperationRepository.getOperation(operation.id) ?: return@forEach
                 if (currentOperationState.status == "PROCESSING" || currentOperationState.status == "SYNCED_AND_BALANCED" || currentOperationState.status.contains("PERMANENTLY")) {
-                    return@forEach // Skip if already processing or in a final state
+                    return@forEach
                 }
 
                 pendingOperationRepository.updateOperation(currentOperationState.copy(status = "PROCESSING", lastAttemptTimestamp = System.currentTimeMillis()))

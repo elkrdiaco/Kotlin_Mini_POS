@@ -3,7 +3,7 @@ package com.argm.minipos.data.repository
 import com.argm.minipos.data.model.Sale
 import com.argm.minipos.data.model.SaleItem
 import com.argm.minipos.data.model.SaleWithItems
-import com.argm.minipos.util.UiResult
+import com.argm.minipos.utils.UiResult
 import kotlinx.coroutines.flow.Flow
 
 interface SaleRepository {

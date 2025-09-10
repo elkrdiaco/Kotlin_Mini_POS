@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.argm.minipos.data.model.Product
+import com.argm.minipos.utils.formatPrice
 
 @Composable
 fun ProductSaleItem(
@@ -49,7 +50,7 @@ fun ProductSaleItem(
         }
         Spacer(Modifier.width(16.dp))
         Text(
-            "$${"%.2f".format(product.price)}",
+            "$${formatPrice(product.price)}",
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold
         )

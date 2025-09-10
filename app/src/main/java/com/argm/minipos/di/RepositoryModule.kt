@@ -8,9 +8,7 @@ import com.argm.minipos.data.repository.ProductRepository
 import com.argm.minipos.data.repository.ProductRepositoryImpl
 import com.argm.minipos.data.repository.SaleRepository
 import com.argm.minipos.data.repository.SaleRepositoryImpl
-import com.argm.minipos.ui.viewmodel.BalanceService
 import com.argm.minipos.ui.viewmodel.DepositService
-import com.argm.minipos.ui.viewmodel.SimulatedBalanceService
 import com.argm.minipos.ui.viewmodel.SimulatedDepositService
 import dagger.Binds
 import dagger.Module
@@ -45,12 +43,6 @@ abstract class RepositoryModule {
     abstract fun bindCustomerRepository(
         customerRepositoryImpl: CustomerRepositoryImpl
     ): CustomerRepository
-
-    @Binds
-    @Singleton
-    abstract fun bindBalanceService(
-        simulatedBalanceService: SimulatedBalanceService
-    ): BalanceService
 
     @Binds
     @Singleton

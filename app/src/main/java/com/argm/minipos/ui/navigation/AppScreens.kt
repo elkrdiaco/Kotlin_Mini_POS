@@ -6,6 +6,5 @@ object AppScreens {
     const val SALES_HISTORY_SCREEN = "sales_history"
     const val DEPOSIT_SCREEN = "deposit_screen"
     const val SYNC_SCREEN = "sync_screen"
-    const val BALANCE_SCREEN = "balance_screen"
-    const val CUSTOMER_LIST_SCREEN = "customer_list_screen" // <<<--- NUEVA RUTA
+    const val CUSTOMER_LIST_SCREEN = "customer_list_screen"
 }

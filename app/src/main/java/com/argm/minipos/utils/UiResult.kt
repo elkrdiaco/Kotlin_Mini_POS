@@ -1,4 +1,4 @@
-package com.argm.minipos.util
+package com.argm.minipos.utils
 
 sealed class UiResult<T>(
     open val data: T? = null,

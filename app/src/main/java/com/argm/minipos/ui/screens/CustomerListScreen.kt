@@ -19,7 +19,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.argm.minipos.data.model.Customer
 import com.argm.minipos.ui.viewmodel.CustomerViewModel
-import com.argm.minipos.util.UiResult
+import com.argm.minipos.utils.UiResult
 import java.text.NumberFormat
 
 val SELECTED_CUSTOMER_RUT_KEY = "selected_customer_rut"

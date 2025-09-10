@@ -26,6 +26,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.argm.minipos.data.model.SaleWithItems
+import com.argm.minipos.utils.formatPrice
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -95,7 +96,7 @@ fun SaleHistoryItem(saleWithItems: SaleWithItems) {
                                 style = MaterialTheme.typography.bodyMedium
                             )
                             Text(
-                                "$${"%.2f".format(itemTotalPrice)}",
+                                "$${formatPrice(itemTotalPrice.toDouble())}",
                                 style = MaterialTheme.typography.bodyMedium
                             )
                         }
@@ -110,7 +111,7 @@ fun SaleHistoryItem(saleWithItems: SaleWithItems) {
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
             Text(
-                "Total General: $${"%.2f".format(saleWithItems.sale.totalAmount)}",
+                "Total General: $${formatPrice(saleWithItems.sale.totalAmount.toDouble())}",
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.align(Alignment.CenterHorizontally)

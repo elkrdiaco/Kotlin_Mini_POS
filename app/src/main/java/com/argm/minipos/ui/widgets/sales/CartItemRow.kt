@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.argm.minipos.ui.viewmodel.CartItem
+import com.argm.minipos.utils.formatPrice
 
 @Composable
 fun CartItemRow(
@@ -42,8 +43,8 @@ fun CartItemRow(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(cartItem.product.name, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
-                Text("Cant: ${cartItem.quantity} x $${"%.2f".format(cartItem.product.price)}", style = MaterialTheme.typography.bodyMedium)
-                Text("Subtotal: $${"%.2f".format(cartItem.subtotal)}", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                Text("Cant: ${cartItem.quantity} x $${formatPrice(cartItem.product.price)}", style = MaterialTheme.typography.bodyMedium)
+                Text("Subtotal: $${formatPrice(cartItem.subtotal.toDouble())}", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = onDecreaseQuantity, Modifier.size(36.dp)) {

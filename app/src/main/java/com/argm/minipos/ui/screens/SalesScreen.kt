@@ -37,6 +37,7 @@ import androidx.navigation.NavController
 import com.argm.minipos.ui.navigation.AppScreens
 import com.argm.minipos.ui.viewmodel.SalesViewModel
 import com.argm.minipos.ui.widgets.sales.ProductList
+import com.argm.minipos.utils.formatPrice
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -84,7 +85,7 @@ fun SalesScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            "Total: $${"%.2f".format(uiState.cartTotal)}",
+                            "Total: $${formatPrice(uiState.cartTotal.toDouble())}",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold
                         )

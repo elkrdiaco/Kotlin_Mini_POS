@@ -24,7 +24,7 @@ interface PendingOperationRepository {
     suspend fun updateOperation(operation: PendingOperation)
     suspend fun deleteOperations(operationIds: List<String>)
     suspend fun getOperation(id: String): PendingOperation?
-    suspend fun clearAllOperations() // For testing or specific scenarios
+    suspend fun clearAllOperations()
 }
 
 @Singleton

@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.argm.minipos.data.repository.CustomerRepository
 import com.argm.minipos.data.repository.PendingOperationRepository
-import com.argm.minipos.util.UiResult
+import com.argm.minipos.utils.UiResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,10 +40,10 @@ class SimulatedDepositService @Inject constructor() : DepositService {
         if (Random.nextFloat() < 0.2) { // 20% chance de fallo simulado del servidor
             return Result.failure(Exception("Error simulado por el servicio de depósito"))
         }
-        val commission = amount * 0.01
+        val commission = 200.0
         val netAmount = amount - commission
         val formatter = NumberFormat.getCurrencyInstance(Locale("es", "CL"))
-        return Result.success("Depósito de ${formatter.format(amount)} procesado por servidor. Neto: ${formatter.format(netAmount)}")
+        return Result.success("Depósito de ${formatter.format(amount)} procesado por servidor. Comisión: ${formatter.format(commission)}. Neto: ${formatter.format(netAmount)}")
     }
 }
 
@@ -125,8 +125,12 @@ class DepositViewModel @Inject constructor(
             return
         }
         val amountValue = amountString.toDoubleOrNull()
-        if (amountValue == null || amountValue <= 0) {
-            _uiState.update { it.copy(isLoading = false, message = "Ingrese un monto válido.", isError = true, depositSuccess = false) }
+        if (amountValue == null || amountValue < 1000) {
+            _uiState.update { it.copy(isLoading = false, message = "El monto mínimo del depósito es de 1000.", isError = true, depositSuccess = false) }
+            return
+        }
+        if (amountValue > 200000) {
+            _uiState.update { it.copy(isLoading = false, message = "El monto máximo del depósito es de 200.000.", isError = true, depositSuccess = false) }
             return
         }
 
@@ -143,9 +147,14 @@ class DepositViewModel @Inject constructor(
             )
 
             if (currentState.isOnline) {
+                if (amountValue <= 200) { // Asumiendo que la comisión es 200
+                    _uiState.update { it.copy(isLoading = false, message = "El monto debe ser mayor que la comisión de 200.", isError = true, depositSuccess = false) }
+                    return@launch
+                }
                 val serverResult = depositService.makeDeposit(amountValue, true)
                 if (serverResult.isSuccess) {
-                    val localResult = customerRepository.addBalanceToCustomer(rut, amountValue)
+                    val amountAfterCommission = amountValue - 200
+                    val localResult = customerRepository.addBalanceToCustomer(rut, amountAfterCommission)
                     when (localResult) {
                         is UiResult.Success -> {
                             _uiState.update {

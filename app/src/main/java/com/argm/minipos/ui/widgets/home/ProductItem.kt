@@ -1,4 +1,4 @@
-package com.argm.minipos.ui.widgets.home // Nuevo paquete
+package com.argm.minipos.ui.widgets.home
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.argm.minipos.data.model.Product
+import com.argm.minipos.utils.formatPrice
 
 @Composable
 fun ProductItem(product: Product) {
@@ -28,7 +29,7 @@ fun ProductItem(product: Product) {
             )
         }
         Text(
-            text = "$${"%.2f".format(product.price)}",
+            text = "$${formatPrice(product.price)}",
             style = MaterialTheme.typography.titleMedium
         )
     }

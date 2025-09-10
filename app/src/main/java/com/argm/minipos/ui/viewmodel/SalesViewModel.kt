@@ -8,7 +8,7 @@ import com.argm.minipos.data.model.SaleItem
 import com.argm.minipos.data.repository.CustomerRepository
 import com.argm.minipos.data.repository.ProductRepository
 import com.argm.minipos.data.repository.SaleRepository
-import com.argm.minipos.util.UiResult
+import com.argm.minipos.utils.UiResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
